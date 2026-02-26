@@ -1,0 +1,790 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>爸妈麻将战绩本</title>
+<link href="https://fonts.googleapis.com/css2?family=Ma+Shan+Zheng&family=Noto+Sans+SC:wght@400;700&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --green: #1a6b3a;
+    --green-light: #2a8a4e;
+    --felt: #1d5c35;
+    --red: #c0392b;
+    --gold: #d4a843;
+    --gold-light: #f0c96a;
+    --cream: #faf3e0;
+    --dark: #1a1a1a;
+    --card-bg: rgba(255,255,255,0.06);
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    font-family: 'Noto Sans SC', sans-serif;
+    background-color: var(--felt);
+    background-image:
+      radial-gradient(ellipse at 20% 20%, rgba(255,255,255,0.04) 0%, transparent 60%),
+      repeating-linear-gradient(45deg, transparent, transparent 10px, rgba(0,0,0,0.03) 10px, rgba(0,0,0,0.03) 11px);
+    min-height: 100vh;
+    color: var(--cream);
+    padding-bottom: 40px;
+  }
+
+  header {
+    text-align: center;
+    padding: 32px 20px 20px;
+    position: relative;
+  }
+
+  header::after {
+    content: '';
+    display: block;
+    width: 80%;
+    max-width: 400px;
+    height: 2px;
+    background: linear-gradient(90deg, transparent, var(--gold), transparent);
+    margin: 16px auto 0;
+  }
+
+  h1 {
+    font-family: 'Ma Shan Zheng', cursive;
+    font-size: 2.4rem;
+    color: var(--gold-light);
+    text-shadow: 0 2px 8px rgba(0,0,0,0.5);
+    letter-spacing: 4px;
+  }
+
+  .subtitle {
+    font-size: 0.78rem;
+    color: rgba(240,201,106,0.65);
+    margin-top: 6px;
+    letter-spacing: 2px;
+  }
+
+  .container {
+    max-width: 480px;
+    margin: 0 auto;
+    padding: 0 16px;
+  }
+
+  /* Summary Cards */
+  .summary {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 12px;
+    margin: 20px 0;
+  }
+
+  .stat-card {
+    background: var(--card-bg);
+    border: 1px solid rgba(212,168,67,0.25);
+    border-radius: 14px;
+    padding: 16px;
+    text-align: center;
+    backdrop-filter: blur(4px);
+    transition: transform 0.15s;
+  }
+
+  .stat-card:active { transform: scale(0.97); }
+
+  .stat-label {
+    font-size: 0.7rem;
+    color: rgba(240,201,106,0.7);
+    letter-spacing: 2px;
+    margin-bottom: 8px;
+  }
+
+  .stat-value {
+    font-size: 1.8rem;
+    font-weight: 700;
+    line-height: 1;
+  }
+
+  .stat-value.win { color: #5de88a; }
+  .stat-value.lose { color: #ff6b6b; }
+  .stat-value.neutral { color: var(--gold-light); }
+
+  .stat-sub {
+    font-size: 0.68rem;
+    color: rgba(255,255,255,0.4);
+    margin-top: 4px;
+  }
+
+  /* Budget bar */
+  .budget-section {
+    background: var(--card-bg);
+    border: 1px solid rgba(212,168,67,0.25);
+    border-radius: 14px;
+    padding: 16px 18px;
+    margin-bottom: 16px;
+  }
+
+  .budget-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 10px;
+  }
+
+  .budget-title {
+    font-size: 0.75rem;
+    color: rgba(240,201,106,0.8);
+    letter-spacing: 1px;
+  }
+
+  .budget-edit {
+    font-size: 0.7rem;
+    color: rgba(240,201,106,0.5);
+    cursor: pointer;
+    border: none;
+    background: none;
+    color: var(--gold);
+    text-decoration: underline;
+  }
+
+  .progress-bar {
+    background: rgba(0,0,0,0.3);
+    border-radius: 99px;
+    height: 10px;
+    overflow: hidden;
+  }
+
+  .progress-fill {
+    height: 100%;
+    border-radius: 99px;
+    transition: width 0.4s ease;
+    background: linear-gradient(90deg, #5de88a, var(--gold-light));
+  }
+
+  .progress-fill.warning { background: linear-gradient(90deg, var(--gold), #ff9f43); }
+  .progress-fill.danger { background: linear-gradient(90deg, #ff9f43, #ff6b6b); }
+
+  .budget-status {
+    font-size: 0.72rem;
+    margin-top: 8px;
+    color: rgba(255,255,255,0.6);
+  }
+
+  /* Add record form */
+  .add-section {
+    background: var(--card-bg);
+    border: 1px solid rgba(212,168,67,0.3);
+    border-radius: 16px;
+    padding: 20px;
+    margin-bottom: 16px;
+  }
+
+  .section-title {
+    font-family: 'Ma Shan Zheng', cursive;
+    font-size: 1.1rem;
+    color: var(--gold-light);
+    margin-bottom: 14px;
+    letter-spacing: 2px;
+  }
+
+  .form-row {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 10px;
+    margin-bottom: 10px;
+  }
+
+  .form-group {
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+  }
+
+  .form-group.full { grid-column: 1 / -1; }
+
+  label {
+    font-size: 0.7rem;
+    color: rgba(240,201,106,0.7);
+    letter-spacing: 1px;
+  }
+
+  input, select, textarea {
+    background: rgba(0,0,0,0.3);
+    border: 1px solid rgba(212,168,67,0.2);
+    border-radius: 8px;
+    color: var(--cream);
+    padding: 9px 12px;
+    font-size: 0.88rem;
+    font-family: 'Noto Sans SC', sans-serif;
+    outline: none;
+    transition: border-color 0.2s;
+    width: 100%;
+  }
+
+  input:focus, select:focus, textarea:focus {
+    border-color: var(--gold);
+  }
+
+  select option { background: #1d5c35; }
+
+  .outcome-toggle {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 8px;
+  }
+
+  .outcome-btn {
+    padding: 9px;
+    border-radius: 8px;
+    border: 1px solid rgba(255,255,255,0.15);
+    background: rgba(0,0,0,0.2);
+    color: rgba(255,255,255,0.5);
+    font-size: 0.85rem;
+    cursor: pointer;
+    transition: all 0.15s;
+    font-family: 'Noto Sans SC', sans-serif;
+  }
+
+  .outcome-btn.active-win {
+    background: rgba(93,232,138,0.2);
+    border-color: #5de88a;
+    color: #5de88a;
+  }
+
+  .outcome-btn.active-lose {
+    background: rgba(255,107,107,0.2);
+    border-color: #ff6b6b;
+    color: #ff6b6b;
+  }
+
+  .submit-btn {
+    width: 100%;
+    padding: 13px;
+    background: linear-gradient(135deg, var(--gold), #b8860b);
+    border: none;
+    border-radius: 10px;
+    color: #1a1a1a;
+    font-weight: 700;
+    font-size: 0.95rem;
+    cursor: pointer;
+    margin-top: 12px;
+    font-family: 'Noto Sans SC', sans-serif;
+    letter-spacing: 2px;
+    transition: opacity 0.15s, transform 0.1s;
+  }
+
+  .submit-btn:active { transform: scale(0.98); opacity: 0.85; }
+
+  /* Records list */
+  .records-section {
+    margin-top: 8px;
+  }
+
+  .records-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 12px;
+  }
+
+  .filter-tabs {
+    display: flex;
+    gap: 6px;
+  }
+
+  .filter-tab {
+    font-size: 0.68rem;
+    padding: 4px 10px;
+    border-radius: 99px;
+    border: 1px solid rgba(212,168,67,0.3);
+    background: transparent;
+    color: rgba(240,201,106,0.6);
+    cursor: pointer;
+    font-family: 'Noto Sans SC', sans-serif;
+    transition: all 0.15s;
+  }
+
+  .filter-tab.active {
+    background: rgba(212,168,67,0.2);
+    color: var(--gold-light);
+    border-color: var(--gold);
+  }
+
+  .record-item {
+    background: var(--card-bg);
+    border: 1px solid rgba(212,168,67,0.15);
+    border-radius: 12px;
+    padding: 13px 15px;
+    margin-bottom: 10px;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    animation: slideIn 0.2s ease;
+  }
+
+  @keyframes slideIn {
+    from { opacity: 0; transform: translateY(-8px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  .record-icon {
+    font-size: 1.6rem;
+    flex-shrink: 0;
+  }
+
+  .record-info { flex: 1; min-width: 0; }
+
+  .record-date {
+    font-size: 0.7rem;
+    color: rgba(255,255,255,0.4);
+    margin-bottom: 2px;
+  }
+
+  .record-note {
+    font-size: 0.82rem;
+    color: rgba(255,255,255,0.75);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  .record-amount {
+    font-size: 1.2rem;
+    font-weight: 700;
+    flex-shrink: 0;
+  }
+
+  .record-amount.win { color: #5de88a; }
+  .record-amount.lose { color: #ff6b6b; }
+
+  .record-delete {
+    background: none;
+    border: none;
+    color: rgba(255,255,255,0.2);
+    font-size: 1.1rem;
+    cursor: pointer;
+    padding: 4px;
+    transition: color 0.15s;
+  }
+
+  .record-delete:hover { color: #ff6b6b; }
+
+  .empty-state {
+    text-align: center;
+    padding: 40px 20px;
+    color: rgba(255,255,255,0.3);
+    font-size: 0.85rem;
+    line-height: 1.8;
+  }
+
+  .empty-state .icon { font-size: 2.5rem; margin-bottom: 10px; }
+
+  /* Modal */
+  .modal-overlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(0,0,0,0.7);
+    z-index: 100;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 20px;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.2s;
+  }
+
+  .modal-overlay.show {
+    opacity: 1;
+    pointer-events: all;
+  }
+
+  .modal {
+    background: #1e5e36;
+    border: 1px solid rgba(212,168,67,0.4);
+    border-radius: 16px;
+    padding: 24px;
+    width: 100%;
+    max-width: 320px;
+    transform: scale(0.95);
+    transition: transform 0.2s;
+  }
+
+  .modal-overlay.show .modal { transform: scale(1); }
+
+  .modal h3 {
+    font-family: 'Ma Shan Zheng', cursive;
+    color: var(--gold-light);
+    font-size: 1.2rem;
+    margin-bottom: 14px;
+    letter-spacing: 2px;
+  }
+
+  .modal-btns {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 10px;
+    margin-top: 16px;
+  }
+
+  .btn-cancel {
+    padding: 10px;
+    background: rgba(255,255,255,0.1);
+    border: 1px solid rgba(255,255,255,0.2);
+    border-radius: 8px;
+    color: rgba(255,255,255,0.7);
+    cursor: pointer;
+    font-family: 'Noto Sans SC', sans-serif;
+  }
+
+  .btn-confirm {
+    padding: 10px;
+    background: var(--gold);
+    border: none;
+    border-radius: 8px;
+    color: #1a1a1a;
+    font-weight: 700;
+    cursor: pointer;
+    font-family: 'Noto Sans SC', sans-serif;
+  }
+
+  /* Toast */
+  .toast {
+    position: fixed;
+    bottom: 30px;
+    left: 50%;
+    transform: translateX(-50%) translateY(80px);
+    background: rgba(20,20,20,0.95);
+    border: 1px solid rgba(212,168,67,0.3);
+    color: var(--cream);
+    padding: 10px 20px;
+    border-radius: 99px;
+    font-size: 0.82rem;
+    z-index: 200;
+    transition: transform 0.3s ease;
+    white-space: nowrap;
+  }
+
+  .toast.show { transform: translateX(-50%) translateY(0); }
+
+  /* Scrollbar */
+  ::-webkit-scrollbar { width: 4px; }
+  ::-webkit-scrollbar-track { background: transparent; }
+  ::-webkit-scrollbar-thumb { background: rgba(212,168,67,0.3); border-radius: 2px; }
+</style>
+</head>
+<body>
+
+<header>
+  <h1>🀄 爸妈麻将战绩本</h1>
+  <p class="subtitle">赢了记一笔 · 输了也得记</p>
+</header>
+
+<div class="container">
+
+  <!-- 统计概览 -->
+  <div class="summary">
+    <div class="stat-card">
+      <div class="stat-label">本月净收益</div>
+      <div class="stat-value neutral" id="monthNet">¥0</div>
+      <div class="stat-sub" id="monthSubtext">暂无记录</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-label">本月场次</div>
+      <div class="stat-value neutral" id="monthCount">0</div>
+      <div class="stat-sub" id="monthWinRate">—</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-label">总净收益</div>
+      <div class="stat-value neutral" id="totalNet">¥0</div>
+      <div class="stat-sub" id="totalSub">共 0 场</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-label">最大单笔</div>
+      <div class="stat-value neutral" id="maxRecord">—</div>
+      <div class="stat-sub" id="maxRecordDate">暂无</div>
+    </div>
+  </div>
+
+  <!-- 预算进度 -->
+  <div class="budget-section">
+    <div class="budget-header">
+      <span class="budget-title">📊 本月亏损预警</span>
+      <button class="budget-edit" onclick="openBudgetModal()">修改上限</button>
+    </div>
+    <div class="progress-bar">
+      <div class="progress-fill" id="progressFill" style="width:0%"></div>
+    </div>
+    <div class="budget-status" id="budgetStatus">设置每月最大亏损上限，超过就提醒爸妈收手 🙏</div>
+  </div>
+
+  <!-- 添加记录 -->
+  <div class="add-section">
+    <div class="section-title">✍️ 记一局</div>
+    <div class="form-row">
+      <div class="form-group">
+        <label>日期</label>
+        <input type="date" id="inputDate">
+      </div>
+      <div class="form-group">
+        <label>金额（元）</label>
+        <input type="number" id="inputAmount" placeholder="0" min="0">
+      </div>
+    </div>
+    <div class="form-group" style="margin-bottom:10px">
+      <label>输赢</label>
+      <div class="outcome-toggle">
+        <button class="outcome-btn active-win" id="btnWin" onclick="selectOutcome('win')">🏆 赢了！</button>
+        <button class="outcome-btn" id="btnLose" onclick="selectOutcome('lose')">💸 输了…</button>
+      </div>
+    </div>
+    <div class="form-group">
+      <label>备注（选填）</label>
+      <input type="text" id="inputNote" placeholder="比如：胡了个大四喜">
+    </div>
+    <button class="submit-btn" onclick="addRecord()">记下这一局 👊</button>
+  </div>
+
+  <!-- 记录列表 -->
+  <div class="records-section">
+    <div class="records-header">
+      <div class="section-title" style="margin:0">📋 历史记录</div>
+      <div class="filter-tabs">
+        <button class="filter-tab active" onclick="setFilter('all', this)">全部</button>
+        <button class="filter-tab" onclick="setFilter('win', this)">赢</button>
+        <button class="filter-tab" onclick="setFilter('lose', this)">输</button>
+      </div>
+    </div>
+    <div id="recordsList"></div>
+  </div>
+
+</div>
+
+<!-- 预算设置弹窗 -->
+<div class="modal-overlay" id="budgetModal">
+  <div class="modal">
+    <h3>⚠️ 设置亏损上限</h3>
+    <p style="font-size:0.8rem;color:rgba(255,255,255,0.6);margin-bottom:14px;line-height:1.6">
+      每月亏损超过这个数，就会出现红色警告<br>提醒爸妈："差不多得了！"
+    </p>
+    <div class="form-group">
+      <label>每月最大亏损（元）</label>
+      <input type="number" id="budgetInput" placeholder="例如：500" min="0">
+    </div>
+    <div class="modal-btns">
+      <button class="btn-cancel" onclick="closeBudgetModal()">取消</button>
+      <button class="btn-confirm" onclick="saveBudget()">保存</button>
+    </div>
+  </div>
+</div>
+
+<!-- Toast 提示 -->
+<div class="toast" id="toast"></div>
+
+<script>
+  let records = JSON.parse(localStorage.getItem('mahjong_records') || '[]');
+  let budget = parseInt(localStorage.getItem('mahjong_budget') || '0');
+  let currentOutcome = 'win';
+  let currentFilter = 'all';
+
+  // 初始化日期
+  document.getElementById('inputDate').value = new Date().toISOString().slice(0,10);
+
+  function selectOutcome(type) {
+    currentOutcome = type;
+    document.getElementById('btnWin').className = 'outcome-btn' + (type === 'win' ? ' active-win' : '');
+    document.getElementById('btnLose').className = 'outcome-btn' + (type === 'lose' ? ' active-lose' : '');
+  }
+
+  function addRecord() {
+    const date = document.getElementById('inputDate').value;
+    const amount = parseFloat(document.getElementById('inputAmount').value);
+    const note = document.getElementById('inputNote').value.trim();
+
+    if (!date) { showToast('📅 日期不能为空哦'); return; }
+    if (!amount || amount <= 0) { showToast('💰 金额得填个正数吧'); return; }
+
+    const record = {
+      id: Date.now(),
+      date,
+      amount,
+      outcome: currentOutcome,
+      note: note || (currentOutcome === 'win' ? '又赢了一局！' : '今天手气不好…')
+    };
+
+    records.unshift(record);
+    saveData();
+
+    // 清空表单
+    document.getElementById('inputAmount').value = '';
+    document.getElementById('inputNote').value = '';
+
+    const funMessages = currentOutcome === 'win'
+      ? ['记下了！财神爷保佑 🎉', '赢了赢了！记好账 ✅', '人挡杀人，牌挡杀牌 🀄']
+      : ['哎，记下了…下把扳回来 🙏', '亏了也是历练，记好账 📝', '别灰心，东风还没来呢 💪'];
+    showToast(funMessages[Math.floor(Math.random() * funMessages.length)]);
+
+    renderAll();
+  }
+
+  function deleteRecord(id) {
+    if (!confirm('确定删除这条记录？')) return;
+    records = records.filter(r => r.id !== id);
+    saveData();
+    renderAll();
+    showToast('🗑️ 已删除');
+  }
+
+  function setFilter(filter, el) {
+    currentFilter = filter;
+    document.querySelectorAll('.filter-tab').forEach(t => t.classList.remove('active'));
+    el.classList.add('active');
+    renderRecords();
+  }
+
+  function saveData() {
+    localStorage.setItem('mahjong_records', JSON.stringify(records));
+  }
+
+  function renderAll() {
+    renderStats();
+    renderBudget();
+    renderRecords();
+  }
+
+  function renderStats() {
+    const now = new Date();
+    const thisMonth = `${now.getFullYear()}-${String(now.getMonth()+1).padStart(2,'0')}`;
+    const monthRecs = records.filter(r => r.date.startsWith(thisMonth));
+
+    const monthNet = monthRecs.reduce((s, r) => s + (r.outcome === 'win' ? r.amount : -r.amount), 0);
+    const totalNet = records.reduce((s, r) => s + (r.outcome === 'win' ? r.amount : -r.amount), 0);
+    const monthWins = monthRecs.filter(r => r.outcome === 'win').length;
+
+    // Month net
+    const mnEl = document.getElementById('monthNet');
+    mnEl.textContent = (monthNet >= 0 ? '+' : '') + '¥' + Math.abs(monthNet);
+    mnEl.className = 'stat-value ' + (monthNet > 0 ? 'win' : monthNet < 0 ? 'lose' : 'neutral');
+    document.getElementById('monthSubtext').textContent = monthNet > 0 ? '小赚一笔 😄' : monthNet < 0 ? '亏了，加油 💪' : '不输不赢';
+
+    // Month count
+    document.getElementById('monthCount').textContent = monthRecs.length;
+    document.getElementById('monthWinRate').textContent = monthRecs.length
+      ? `胜率 ${Math.round(monthWins/monthRecs.length*100)}%`
+      : '开始记录吧';
+
+    // Total net
+    const tnEl = document.getElementById('totalNet');
+    tnEl.textContent = (totalNet >= 0 ? '+' : '') + '¥' + Math.abs(totalNet);
+    tnEl.className = 'stat-value ' + (totalNet > 0 ? 'win' : totalNet < 0 ? 'lose' : 'neutral');
+    document.getElementById('totalSub').textContent = `共 ${records.length} 场`;
+
+    // Max record
+    if (records.length) {
+      const wins = records.filter(r => r.outcome === 'win');
+      const loses = records.filter(r => r.outcome === 'lose');
+      const maxWin = wins.length ? Math.max(...wins.map(r => r.amount)) : 0;
+      const maxLose = loses.length ? Math.max(...loses.map(r => r.amount)) : 0;
+      const isBigWin = maxWin >= maxLose;
+      const maxEl = document.getElementById('maxRecord');
+      maxEl.textContent = (isBigWin ? '+' : '-') + '¥' + (isBigWin ? maxWin : maxLose);
+      maxEl.className = 'stat-value ' + (isBigWin ? 'win' : 'lose');
+      document.getElementById('maxRecordDate').textContent = isBigWin ? '最大单赢' : '最大单输';
+    }
+  }
+
+  function renderBudget() {
+    const now = new Date();
+    const thisMonth = `${now.getFullYear()}-${String(now.getMonth()+1).padStart(2,'0')}`;
+    const monthLoss = records
+      .filter(r => r.date.startsWith(thisMonth) && r.outcome === 'lose')
+      .reduce((s, r) => s + r.amount, 0);
+
+    const fill = document.getElementById('progressFill');
+    const status = document.getElementById('budgetStatus');
+
+    if (!budget) {
+      fill.style.width = '0%';
+      status.textContent = '点击右上角「修改上限」，设置每月最大亏损预算 👆';
+      return;
+    }
+
+    const pct = Math.min(monthLoss / budget * 100, 100);
+    fill.style.width = pct + '%';
+    fill.className = 'progress-fill' + (pct >= 100 ? ' danger' : pct >= 70 ? ' warning' : '');
+
+    if (pct >= 100) {
+      status.innerHTML = `🚨 本月已亏 ¥${monthLoss}，超过上限 ¥${budget}！爸妈，收手吧！`;
+      status.style.color = '#ff6b6b';
+    } else if (pct >= 70) {
+      status.innerHTML = `⚠️ 本月已亏 ¥${monthLoss} / ¥${budget}（${Math.round(pct)}%），悠着点哦`;
+      status.style.color = '#ffc107';
+    } else {
+      status.innerHTML = `✅ 本月亏损 ¥${monthLoss} / ¥${budget}（${Math.round(pct)}%），还好还好`;
+      status.style.color = 'rgba(255,255,255,0.6)';
+    }
+  }
+
+  function renderRecords() {
+    const list = document.getElementById('recordsList');
+    let filtered = currentFilter === 'all' ? records
+      : records.filter(r => r.outcome === currentFilter);
+
+    if (!filtered.length) {
+      list.innerHTML = `<div class="empty-state">
+        <div class="icon">🀄</div>
+        <div>${currentFilter === 'all' ? '还没有记录\n快去打一局！' : '这个筛选下没有记录'}</div>
+      </div>`;
+      return;
+    }
+
+    list.innerHTML = filtered.map(r => {
+      const isWin = r.outcome === 'win';
+      const dateStr = r.date.replace(/-/g, '/').slice(5); // MM/DD
+      return `<div class="record-item">
+        <div class="record-icon">${isWin ? '🏆' : '💸'}</div>
+        <div class="record-info">
+          <div class="record-date">${r.date.slice(0,4)}年 ${dateStr}</div>
+          <div class="record-note">${escHtml(r.note)}</div>
+        </div>
+        <div class="record-amount ${isWin ? 'win' : 'lose'}">${isWin ? '+' : '-'}¥${r.amount}</div>
+        <button class="record-delete" onclick="deleteRecord(${r.id})">✕</button>
+      </div>`;
+    }).join('');
+  }
+
+  function escHtml(str) {
+    return str.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+  }
+
+  function openBudgetModal() {
+    document.getElementById('budgetInput').value = budget || '';
+    document.getElementById('budgetModal').classList.add('show');
+  }
+
+  function closeBudgetModal() {
+    document.getElementById('budgetModal').classList.remove('show');
+  }
+
+  function saveBudget() {
+    const val = parseInt(document.getElementById('budgetInput').value);
+    if (!val || val <= 0) { showToast('请输入有效金额'); return; }
+    budget = val;
+    localStorage.setItem('mahjong_budget', budget);
+    closeBudgetModal();
+    renderBudget();
+    showToast(`✅ 上限设置为 ¥${budget}/月`);
+  }
+
+  function showToast(msg) {
+    const t = document.getElementById('toast');
+    t.textContent = msg;
+    t.classList.add('show');
+    setTimeout(() => t.classList.remove('show'), 2500);
+  }
+
+  // 点击背景关闭弹窗
+  document.getElementById('budgetModal').addEventListener('click', function(e) {
+    if (e.target === this) closeBudgetModal();
+  });
+
+  renderAll();
+</script>
+</body>
+</html>
