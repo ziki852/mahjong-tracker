@@ -3,11 +3,10 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>爸妈麻将战绩本</title>
+<title>麻将战绩本</title>
 <link href="https://fonts.googleapis.com/css2?family=Ma+Shan+Zheng&family=Noto+Sans+SC:wght@400;700&display=swap" rel="stylesheet">
 <style>
   :root {
-    --green: #1a6b3a;
     --felt: #1d5c35;
     --gold: #d4a843;
     --gold-light: #f0c96a;
@@ -23,7 +22,7 @@
       repeating-linear-gradient(45deg, transparent, transparent 10px, rgba(0,0,0,0.03) 10px, rgba(0,0,0,0.03) 11px);
     min-height: 100vh;
     color: var(--cream);
-    padding-bottom: 40px;
+    padding-bottom: 60px;
   }
   header { text-align: center; padding: 32px 20px 20px; }
   header::after {
@@ -48,112 +47,189 @@
   .sync-status.synced { color: #5de88a; }
   .sync-status.error { color: #ff6b6b; }
   .container { max-width: 480px; margin: 0 auto; padding: 0 16px; }
-  .summary { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin: 20px 0; }
+
+  /* Person tabs */
+  .person-tabs {
+    display: flex;
+    gap: 8px;
+    margin: 16px 0 4px;
+    justify-content: center;
+  }
+  .person-tab {
+    flex: 1;
+    max-width: 160px;
+    padding: 10px;
+    border-radius: 12px;
+    border: 1px solid rgba(212,168,67,0.3);
+    background: transparent;
+    color: rgba(240,201,106,0.6);
+    cursor: pointer;
+    font-family: 'Noto Sans SC', sans-serif;
+    font-size: 0.85rem;
+    transition: all 0.15s;
+    text-align: center;
+  }
+  .person-tab.active {
+    background: rgba(212,168,67,0.2);
+    color: var(--gold-light);
+    border-color: var(--gold);
+  }
+  .person-tab.all.active { background: rgba(255,255,255,0.1); border-color: rgba(255,255,255,0.4); color: white; }
+
+  /* Summary */
+  .summary { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin: 14px 0; }
   .stat-card {
     background: var(--card-bg);
     border: 1px solid rgba(212,168,67,0.25);
     border-radius: 14px;
-    padding: 16px;
+    padding: 14px 12px;
     text-align: center;
   }
-  .stat-label { font-size: 0.7rem; color: rgba(240,201,106,0.7); letter-spacing: 2px; margin-bottom: 8px; }
-  .stat-value { font-size: 1.8rem; font-weight: 700; line-height: 1; }
+  .stat-label { font-size: 0.68rem; color: rgba(240,201,106,0.7); letter-spacing: 1px; margin-bottom: 6px; }
+  .stat-value { font-size: 1.6rem; font-weight: 700; line-height: 1; }
   .stat-value.win { color: #5de88a; }
   .stat-value.lose { color: #ff6b6b; }
   .stat-value.neutral { color: var(--gold-light); }
-  .stat-sub { font-size: 0.68rem; color: rgba(255,255,255,0.4); margin-top: 4px; }
+  .stat-sub { font-size: 0.65rem; color: rgba(255,255,255,0.4); margin-top: 4px; }
+
+  /* Budget sections */
   .budget-section {
     background: var(--card-bg);
     border: 1px solid rgba(212,168,67,0.25);
     border-radius: 14px;
-    padding: 16px 18px;
-    margin-bottom: 16px;
+    padding: 14px 16px;
+    margin-bottom: 12px;
   }
-  .budget-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; }
-  .budget-title { font-size: 0.75rem; color: rgba(240,201,106,0.8); letter-spacing: 1px; }
-  .budget-edit { font-size: 0.7rem; cursor: pointer; border: none; background: none; color: var(--gold); text-decoration: underline; }
-  .progress-bar { background: rgba(0,0,0,0.3); border-radius: 99px; height: 10px; overflow: hidden; }
+  .budget-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px; }
+  .budget-title { font-size: 0.73rem; color: rgba(240,201,106,0.8); letter-spacing: 1px; }
+  .budget-edit { font-size: 0.68rem; cursor: pointer; border: none; background: none; color: var(--gold); text-decoration: underline; white-space: nowrap; }
+  .progress-bar { background: rgba(0,0,0,0.3); border-radius: 99px; height: 8px; overflow: hidden; }
   .progress-fill { height: 100%; border-radius: 99px; transition: width 0.4s ease; background: linear-gradient(90deg, #5de88a, var(--gold-light)); }
   .progress-fill.warning { background: linear-gradient(90deg, var(--gold), #ff9f43); }
   .progress-fill.danger { background: linear-gradient(90deg, #ff9f43, #ff6b6b); }
-  .budget-status { font-size: 0.72rem; margin-top: 8px; color: rgba(255,255,255,0.6); }
+  .budget-status { font-size: 0.7rem; margin-top: 7px; color: rgba(255,255,255,0.6); }
+
+  /* Add form */
   .add-section {
     background: var(--card-bg);
     border: 1px solid rgba(212,168,67,0.3);
     border-radius: 16px;
-    padding: 20px;
-    margin-bottom: 16px;
+    padding: 18px;
+    margin-bottom: 14px;
   }
-  .section-title { font-family: 'Ma Shan Zheng', cursive; font-size: 1.1rem; color: var(--gold-light); margin-bottom: 14px; letter-spacing: 2px; }
-  .form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 10px; }
-  .form-group { display: flex; flex-direction: column; gap: 5px; }
-  label { font-size: 0.7rem; color: rgba(240,201,106,0.7); letter-spacing: 1px; }
-  input, select {
+  .section-title { font-family: 'Ma Shan Zheng', cursive; font-size: 1.1rem; color: var(--gold-light); margin-bottom: 12px; letter-spacing: 2px; }
+
+  .form-row {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 10px;
+    margin-bottom: 10px;
+  }
+  .form-group { display: flex; flex-direction: column; gap: 5px; min-width: 0; }
+
+  label { font-size: 0.68rem; color: rgba(240,201,106,0.7); letter-spacing: 1px; }
+  input[type="date"],
+  input[type="number"],
+  input[type="text"] {
     background: rgba(0,0,0,0.3);
     border: 1px solid rgba(212,168,67,0.2);
     border-radius: 8px;
     color: var(--cream);
-    padding: 9px 12px;
-    font-size: 0.88rem;
+    padding: 9px 10px;
+    font-size: 0.85rem;
     font-family: 'Noto Sans SC', sans-serif;
     outline: none;
     transition: border-color 0.2s;
     width: 100%;
+    min-width: 0;
   }
   input:focus { border-color: var(--gold); }
-  .outcome-toggle { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
-  .outcome-btn {
-    padding: 9px; border-radius: 8px;
+  input[type="date"]::-webkit-calendar-picker-indicator { filter: invert(0.8); }
+
+  .toggle-group {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 8px;
+  }
+  .toggle-btn {
+    padding: 9px 6px;
+    border-radius: 8px;
     border: 1px solid rgba(255,255,255,0.15);
     background: rgba(0,0,0,0.2);
     color: rgba(255,255,255,0.5);
-    font-size: 0.85rem; cursor: pointer;
+    font-size: 0.82rem;
+    cursor: pointer;
     transition: all 0.15s;
     font-family: 'Noto Sans SC', sans-serif;
+    text-align: center;
+    white-space: nowrap;
   }
-  .outcome-btn.active-win { background: rgba(93,232,138,0.2); border-color: #5de88a; color: #5de88a; }
-  .outcome-btn.active-lose { background: rgba(255,107,107,0.2); border-color: #ff6b6b; color: #ff6b6b; }
+  .toggle-btn.active-win { background: rgba(93,232,138,0.2); border-color: #5de88a; color: #5de88a; }
+  .toggle-btn.active-lose { background: rgba(255,107,107,0.2); border-color: #ff6b6b; color: #ff6b6b; }
+  .toggle-btn.active-person { background: rgba(212,168,67,0.2); border-color: var(--gold); color: var(--gold-light); }
+
   .submit-btn {
-    width: 100%; padding: 13px;
+    width: 100%; padding: 12px;
     background: linear-gradient(135deg, var(--gold), #b8860b);
     border: none; border-radius: 10px;
-    color: #1a1a1a; font-weight: 700; font-size: 0.95rem;
-    cursor: pointer; margin-top: 12px;
+    color: #1a1a1a; font-weight: 700; font-size: 0.92rem;
+    cursor: pointer; margin-top: 10px;
     font-family: 'Noto Sans SC', sans-serif;
     letter-spacing: 2px;
     transition: opacity 0.15s, transform 0.1s;
   }
   .submit-btn:active { transform: scale(0.98); opacity: 0.85; }
   .submit-btn:disabled { opacity: 0.5; cursor: not-allowed; }
-  .records-section { margin-top: 8px; }
-  .records-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; }
-  .filter-tabs { display: flex; gap: 6px; }
+
+  /* Records */
+  .records-section { margin-top: 6px; }
+  .records-header { margin-bottom: 10px; }
+  .records-header-top { display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px; }
+  .filter-tabs { display: flex; gap: 5px; flex-wrap: wrap; }
   .filter-tab {
-    font-size: 0.68rem; padding: 4px 10px; border-radius: 99px;
+    font-size: 0.65rem; padding: 4px 9px; border-radius: 99px;
     border: 1px solid rgba(212,168,67,0.3); background: transparent;
     color: rgba(240,201,106,0.6); cursor: pointer;
     font-family: 'Noto Sans SC', sans-serif; transition: all 0.15s;
   }
   .filter-tab.active { background: rgba(212,168,67,0.2); color: var(--gold-light); border-color: var(--gold); }
+
+  .export-btn {
+    font-size: 0.65rem; padding: 4px 10px; border-radius: 99px;
+    border: 1px solid rgba(255,255,255,0.2); background: transparent;
+    color: rgba(255,255,255,0.5); cursor: pointer;
+    font-family: 'Noto Sans SC', sans-serif; transition: all 0.15s;
+  }
+  .export-btn:hover { border-color: var(--gold); color: var(--gold-light); }
+
   .record-item {
     background: var(--card-bg);
     border: 1px solid rgba(212,168,67,0.15);
-    border-radius: 12px; padding: 13px 15px; margin-bottom: 10px;
-    display: flex; align-items: center; gap: 12px;
+    border-radius: 12px; padding: 12px 14px; margin-bottom: 9px;
+    display: flex; align-items: center; gap: 10px;
     animation: slideIn 0.2s ease;
   }
-  @keyframes slideIn { from { opacity:0; transform:translateY(-8px); } to { opacity:1; transform:translateY(0); } }
-  .record-icon { font-size: 1.6rem; flex-shrink: 0; }
+  @keyframes slideIn { from { opacity:0; transform:translateY(-6px); } to { opacity:1; transform:translateY(0); } }
+  .record-icon { font-size: 1.4rem; flex-shrink: 0; }
   .record-info { flex: 1; min-width: 0; }
-  .record-date { font-size: 0.7rem; color: rgba(255,255,255,0.4); margin-bottom: 2px; }
-  .record-note { font-size: 0.82rem; color: rgba(255,255,255,0.75); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-  .record-amount { font-size: 1.2rem; font-weight: 700; flex-shrink: 0; }
+  .record-meta { display: flex; gap: 6px; align-items: center; margin-bottom: 2px; }
+  .record-date { font-size: 0.68rem; color: rgba(255,255,255,0.4); }
+  .record-person {
+    font-size: 0.62rem; padding: 1px 6px; border-radius: 99px;
+    background: rgba(212,168,67,0.15); color: var(--gold-light);
+    border: 1px solid rgba(212,168,67,0.25);
+  }
+  .record-note { font-size: 0.8rem; color: rgba(255,255,255,0.75); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .record-amount { font-size: 1.1rem; font-weight: 700; flex-shrink: 0; }
   .record-amount.win { color: #5de88a; }
   .record-amount.lose { color: #ff6b6b; }
-  .record-delete { background: none; border: none; color: rgba(255,255,255,0.2); font-size: 1.1rem; cursor: pointer; padding: 4px; transition: color 0.15s; }
+  .record-delete { background: none; border: none; color: rgba(255,255,255,0.2); font-size: 1rem; cursor: pointer; padding: 4px; transition: color 0.15s; flex-shrink: 0; }
   .record-delete:hover { color: #ff6b6b; }
-  .empty-state { text-align: center; padding: 40px 20px; color: rgba(255,255,255,0.3); font-size: 0.85rem; line-height: 1.8; }
-  .empty-state .icon { font-size: 2.5rem; margin-bottom: 10px; }
+
+  .empty-state { text-align: center; padding: 36px 20px; color: rgba(255,255,255,0.3); font-size: 0.83rem; line-height: 1.8; }
+  .empty-state .icon { font-size: 2.2rem; margin-bottom: 10px; }
+
+  /* Modal */
   .modal-overlay {
     position: fixed; inset: 0; background: rgba(0,0,0,0.7);
     z-index: 100; display: flex; align-items: center; justify-content: center;
@@ -162,14 +238,17 @@
   .modal-overlay.show { opacity: 1; pointer-events: all; }
   .modal {
     background: #1e5e36; border: 1px solid rgba(212,168,67,0.4);
-    border-radius: 16px; padding: 24px; width: 100%; max-width: 320px;
+    border-radius: 16px; padding: 22px; width: 100%; max-width: 320px;
     transform: scale(0.95); transition: transform 0.2s;
   }
   .modal-overlay.show .modal { transform: scale(1); }
-  .modal h3 { font-family: 'Ma Shan Zheng', cursive; color: var(--gold-light); font-size: 1.2rem; margin-bottom: 14px; letter-spacing: 2px; }
-  .modal-btns { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 16px; }
+  .modal h3 { font-family: 'Ma Shan Zheng', cursive; color: var(--gold-light); font-size: 1.1rem; margin-bottom: 12px; letter-spacing: 2px; }
+  .modal p { font-size: 0.78rem; color: rgba(255,255,255,0.6); margin-bottom: 12px; line-height: 1.6; }
+  .modal-row { display: flex; flex-direction: column; gap: 5px; margin-bottom: 10px; }
+  .modal-btns { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 14px; }
   .btn-cancel { padding: 10px; background: rgba(255,255,255,0.1); border: 1px solid rgba(255,255,255,0.2); border-radius: 8px; color: rgba(255,255,255,0.7); cursor: pointer; font-family: 'Noto Sans SC', sans-serif; }
   .btn-confirm { padding: 10px; background: var(--gold); border: none; border-radius: 8px; color: #1a1a1a; font-weight: 700; cursor: pointer; font-family: 'Noto Sans SC', sans-serif; }
+
   .toast {
     position: fixed; bottom: 30px; left: 50%;
     transform: translateX(-50%) translateY(80px);
@@ -184,12 +263,21 @@
 <body>
 
 <header>
-  <h1>🀄 爸妈麻将战绩本</h1>
+  <h1>🀄 麻将战绩本</h1>
   <p class="subtitle">赢了记一笔 · 输了也得记</p>
   <p class="sync-status" id="syncStatus">☁️ 连接中…</p>
 </header>
 
 <div class="container">
+
+  <!-- 人物切换视角 -->
+  <div class="person-tabs">
+    <button class="person-tab all active" id="viewAll" onclick="setView('all', this)">📊 全部</button>
+    <button class="person-tab" id="view一粒米" onclick="setView('一粒米', this)">🌾 一粒米</button>
+    <button class="person-tab" id="view谭老师" onclick="setView('谭老师', this)">👩‍🏫 谭老师</button>
+  </div>
+
+  <!-- 统计概览 -->
   <div class="summary">
     <div class="stat-card">
       <div class="stat-label">本月净收益</div>
@@ -209,21 +297,35 @@
     <div class="stat-card">
       <div class="stat-label">最大单笔</div>
       <div class="stat-value neutral" id="maxRecord">—</div>
-      <div class="stat-sub" id="maxRecordDate">暂无</div>
+      <div class="stat-sub" id="maxRecordSub">暂无</div>
     </div>
   </div>
 
+  <!-- 本周限额 -->
   <div class="budget-section">
     <div class="budget-header">
-      <span class="budget-title">📊 本月亏损预警</span>
-      <button class="budget-edit" onclick="openBudgetModal()">修改上限</button>
+      <span class="budget-title">📅 本周亏损预警</span>
+      <button class="budget-edit" onclick="openBudgetModal('week')">修改上限</button>
     </div>
     <div class="progress-bar">
-      <div class="progress-fill" id="progressFill" style="width:0%"></div>
+      <div class="progress-fill" id="weekProgressFill" style="width:0%"></div>
     </div>
-    <div class="budget-status" id="budgetStatus">设置每月最大亏损上限，超过就提醒爸妈收手 🙏</div>
+    <div class="budget-status" id="weekBudgetStatus">点击「修改上限」设置每周最大亏损 👆</div>
   </div>
 
+  <!-- 本月限额 -->
+  <div class="budget-section">
+    <div class="budget-header">
+      <span class="budget-title">📆 本月亏损预警</span>
+      <button class="budget-edit" onclick="openBudgetModal('month')">修改上限</button>
+    </div>
+    <div class="progress-bar">
+      <div class="progress-fill" id="monthProgressFill" style="width:0%"></div>
+    </div>
+    <div class="budget-status" id="monthBudgetStatus">点击「修改上限」设置每月最大亏损 👆</div>
+  </div>
+
+  <!-- 记一局 -->
   <div class="add-section">
     <div class="section-title">✍️ 记一局</div>
     <div class="form-row">
@@ -236,11 +338,20 @@
         <input type="number" id="inputAmount" placeholder="0" min="0">
       </div>
     </div>
-    <div class="form-group" style="margin-bottom:10px">
-      <label>输赢</label>
-      <div class="outcome-toggle">
-        <button class="outcome-btn active-win" id="btnWin" onclick="selectOutcome('win')">🏆 赢了！</button>
-        <button class="outcome-btn" id="btnLose" onclick="selectOutcome('lose')">💸 输了…</button>
+    <div class="form-row">
+      <div class="form-group">
+        <label>谁打的</label>
+        <div class="toggle-group">
+          <button class="toggle-btn active-person" id="btn一粒米" onclick="selectPerson('一粒米')">🌾 一粒米</button>
+          <button class="toggle-btn" id="btn谭老师" onclick="selectPerson('谭老师')">👩‍🏫 谭老师</button>
+        </div>
+      </div>
+      <div class="form-group">
+        <label>输赢</label>
+        <div class="toggle-group">
+          <button class="toggle-btn active-win" id="btnWin" onclick="selectOutcome('win')">🏆 赢</button>
+          <button class="toggle-btn" id="btnLose" onclick="selectOutcome('lose')">💸 输</button>
+        </div>
       </div>
     </div>
     <div class="form-group">
@@ -250,28 +361,33 @@
     <button class="submit-btn" id="submitBtn" onclick="addRecord()">记下这一局 👊</button>
   </div>
 
+  <!-- 历史记录 -->
   <div class="records-section">
     <div class="records-header">
-      <div class="section-title" style="margin:0">📋 历史记录</div>
+      <div class="records-header-top">
+        <div class="section-title" style="margin:0">📋 历史记录</div>
+        <button class="export-btn" onclick="exportCSV()">⬇️ 导出CSV</button>
+      </div>
       <div class="filter-tabs">
         <button class="filter-tab active" onclick="setFilter('all', this)">全部</button>
         <button class="filter-tab" onclick="setFilter('win', this)">赢</button>
         <button class="filter-tab" onclick="setFilter('lose', this)">输</button>
+        <button class="filter-tab" onclick="setFilter('一粒米', this)">一粒米</button>
+        <button class="filter-tab" onclick="setFilter('谭老师', this)">谭老师</button>
       </div>
     </div>
     <div id="recordsList"><div class="empty-state"><div class="icon">☁️</div><div>加载中…</div></div></div>
   </div>
 </div>
 
+<!-- 限额弹窗 -->
 <div class="modal-overlay" id="budgetModal">
   <div class="modal">
-    <h3>⚠️ 设置亏损上限</h3>
-    <p style="font-size:0.8rem;color:rgba(255,255,255,0.6);margin-bottom:14px;line-height:1.6">
-      每月亏损超过这个数，就会出现红色警告<br>提醒爸妈："差不多得了！"
-    </p>
-    <div class="form-group">
-      <label>每月最大亏损（元）</label>
-      <input type="number" id="budgetInput" placeholder="例如：500" min="0">
+    <h3 id="budgetModalTitle">⚠️ 设置亏损上限</h3>
+    <p id="budgetModalDesc">每周亏损超过这个数，就会出现红色警告</p>
+    <div class="modal-row">
+      <label>最大亏损金额（元）</label>
+      <input type="number" id="budgetInput" placeholder="例如：200" min="0">
     </div>
     <div class="modal-btns">
       <button class="btn-cancel" onclick="closeBudgetModal()">取消</button>
@@ -300,23 +416,26 @@
 
   const db = getFirestore(app);
   let records = [];
-  let budget = 0;
+  let weekBudget = 0, monthBudget = 0;
   let currentOutcome = 'win';
+  let currentPerson = '一粒米';
   let currentFilter = 'all';
+  let currentView = 'all'; // 顶部视角切换
+  let editingBudgetType = 'week';
 
   document.getElementById('inputDate').value = new Date().toISOString().slice(0,10);
 
   const syncEl = document.getElementById('syncStatus');
 
-  // 读取预算设置
-  async function loadBudget() {
+  async function loadBudgets() {
     try {
-      const snap = await getDoc(doc(db, 'settings', 'budget'));
-      if (snap.exists()) budget = snap.data().value || 0;
+      const ws = await getDoc(doc(db, 'settings', 'weekBudget'));
+      if (ws.exists()) weekBudget = ws.data().value || 0;
+      const ms = await getDoc(doc(db, 'settings', 'monthBudget'));
+      if (ms.exists()) monthBudget = ms.data().value || 0;
     } catch(e) {}
   }
 
-  // 实时监听记录变化（任何设备改了都会同步）
   onSnapshot(
     query(collection(db, 'records'), orderBy('createdAt', 'desc')),
     (snapshot) => {
@@ -331,92 +450,42 @@
     }
   );
 
-  loadBudget().then(renderAll);
+  loadBudgets().then(renderAll);
 
-  // ——— 全局函数 ———
-  window.selectOutcome = (type) => {
-    currentOutcome = type;
-    document.getElementById('btnWin').className = 'outcome-btn' + (type === 'win' ? ' active-win' : '');
-    document.getElementById('btnLose').className = 'outcome-btn' + (type === 'lose' ? ' active-lose' : '');
-  };
+  // 工具函数
+  function getWeekRange() {
+    const now = new Date();
+    const day = now.getDay() || 7;
+    const mon = new Date(now); mon.setDate(now.getDate() - day + 1); mon.setHours(0,0,0,0);
+    const sun = new Date(mon); sun.setDate(mon.getDate() + 6); sun.setHours(23,59,59,999);
+    return { start: mon, end: sun };
+  }
 
-  window.addRecord = async () => {
-    const date = document.getElementById('inputDate').value;
-    const amount = parseFloat(document.getElementById('inputAmount').value);
-    const note = document.getElementById('inputNote').value.trim();
-    if (!date) { showToast('📅 日期不能为空哦'); return; }
-    if (!amount || amount <= 0) { showToast('💰 金额得填个正数吧'); return; }
+  function dateInWeek(dateStr) {
+    const { start, end } = getWeekRange();
+    const d = new Date(dateStr);
+    return d >= start && d <= end;
+  }
 
-    const btn = document.getElementById('submitBtn');
-    btn.disabled = true;
-    syncEl.textContent = '☁️ 保存中…';
-    syncEl.className = 'sync-status syncing';
+  function getMonthPrefix() {
+    const now = new Date();
+    return `${now.getFullYear()}-${String(now.getMonth()+1).padStart(2,'0')}`;
+  }
 
-    try {
-      await addDoc(collection(db, 'records'), {
-        date, amount, outcome: currentOutcome,
-        note: note || (currentOutcome === 'win' ? '又赢了一局！' : '今天手气不好…'),
-        createdAt: Date.now()
-      });
-      document.getElementById('inputAmount').value = '';
-      document.getElementById('inputNote').value = '';
-      const msgs = currentOutcome === 'win'
-        ? ['记下了！财神爷保佑 🎉', '赢了赢了！记好账 ✅', '人挡杀人，牌挡杀牌 🀄']
-        : ['哎，记下了…下把扳回来 🙏', '亏了也是历练，记好账 📝', '别灰心，东风还没来呢 💪'];
-      showToast(msgs[Math.floor(Math.random() * msgs.length)]);
-    } catch(e) {
-      showToast('❌ 保存失败，检查网络');
-    }
-    btn.disabled = false;
-  };
+  function filterByView(recs) {
+    if (currentView === 'all') return recs;
+    return recs.filter(r => r.person === currentView);
+  }
 
-  window.deleteRecord = async (id) => {
-    if (!confirm('确定删除这条记录？')) return;
-    try {
-      await deleteDoc(doc(db, 'records', id));
-      showToast('🗑️ 已删除');
-    } catch(e) { showToast('❌ 删除失败'); }
-  };
-
-  window.setFilter = (filter, el) => {
-    currentFilter = filter;
-    document.querySelectorAll('.filter-tab').forEach(t => t.classList.remove('active'));
-    el.classList.add('active');
-    renderRecords();
-  };
-
-  window.openBudgetModal = () => {
-    document.getElementById('budgetInput').value = budget || '';
-    document.getElementById('budgetModal').classList.add('show');
-  };
-
-  window.closeBudgetModal = () => document.getElementById('budgetModal').classList.remove('show');
-
-  window.saveBudget = async () => {
-    const val = parseInt(document.getElementById('budgetInput').value);
-    if (!val || val <= 0) { showToast('请输入有效金额'); return; }
-    budget = val;
-    try {
-      await setDoc(doc(db, 'settings', 'budget'), { value: budget });
-      closeBudgetModal();
-      renderBudget();
-      showToast(`✅ 上限设置为 ¥${budget}/月`);
-    } catch(e) { showToast('❌ 保存失败'); }
-  };
-
-  document.getElementById('budgetModal').addEventListener('click', function(e) {
-    if (e.target === this) closeBudgetModal();
-  });
-
-  // ——— 渲染函数 ———
-  function renderAll() { renderStats(); renderBudget(); renderRecords(); }
+  // ——— 渲染 ———
+  function renderAll() { renderStats(); renderBudgets(); renderRecords(); }
 
   function renderStats() {
-    const now = new Date();
-    const m = `${now.getFullYear()}-${String(now.getMonth()+1).padStart(2,'0')}`;
-    const mr = records.filter(r => r.date?.startsWith(m));
+    const viewRecs = filterByView(records);
+    const m = getMonthPrefix();
+    const mr = viewRecs.filter(r => r.date?.startsWith(m));
     const monthNet = mr.reduce((s,r) => s + (r.outcome==='win' ? r.amount : -r.amount), 0);
-    const totalNet = records.reduce((s,r) => s + (r.outcome==='win' ? r.amount : -r.amount), 0);
+    const totalNet = viewRecs.reduce((s,r) => s + (r.outcome==='win' ? r.amount : -r.amount), 0);
     const mWins = mr.filter(r => r.outcome==='win').length;
 
     const mnEl = document.getElementById('monthNet');
@@ -429,54 +498,75 @@
     const tnEl = document.getElementById('totalNet');
     tnEl.textContent = (totalNet>=0?'+':'') + '¥' + Math.abs(totalNet);
     tnEl.className = 'stat-value ' + (totalNet>0?'win':totalNet<0?'lose':'neutral');
-    document.getElementById('totalSub').textContent = `共 ${records.length} 场`;
+    document.getElementById('totalSub').textContent = `共 ${viewRecs.length} 场`;
 
-    if (records.length) {
-      const wins = records.filter(r=>r.outcome==='win');
-      const loses = records.filter(r=>r.outcome==='lose');
+    if (viewRecs.length) {
+      const wins = viewRecs.filter(r=>r.outcome==='win');
+      const loses = viewRecs.filter(r=>r.outcome==='lose');
       const mxW = wins.length ? Math.max(...wins.map(r=>r.amount)) : 0;
       const mxL = loses.length ? Math.max(...loses.map(r=>r.amount)) : 0;
       const isBigWin = mxW >= mxL;
       const maxEl = document.getElementById('maxRecord');
       maxEl.textContent = (isBigWin?'+':'-') + '¥' + (isBigWin?mxW:mxL);
       maxEl.className = 'stat-value ' + (isBigWin?'win':'lose');
-      document.getElementById('maxRecordDate').textContent = isBigWin ? '最大单赢' : '最大单输';
+      document.getElementById('maxRecordSub').textContent = isBigWin ? '最大单赢' : '最大单输';
+    } else {
+      document.getElementById('maxRecord').textContent = '—';
+      document.getElementById('maxRecordSub').textContent = '暂无';
     }
   }
 
-  function renderBudget() {
-    const now = new Date();
-    const m = `${now.getFullYear()}-${String(now.getMonth()+1).padStart(2,'0')}`;
-    const loss = records.filter(r=>r.date?.startsWith(m)&&r.outcome==='lose').reduce((s,r)=>s+r.amount,0);
-    const fill = document.getElementById('progressFill');
-    const status = document.getElementById('budgetStatus');
+  function renderBudgets() {
+    const viewRecs = filterByView(records);
+    const m = getMonthPrefix();
+
+    const weekLoss = viewRecs.filter(r => dateInWeek(r.date) && r.outcome==='lose').reduce((s,r)=>s+r.amount,0);
+    const monthLoss = viewRecs.filter(r => r.date?.startsWith(m) && r.outcome==='lose').reduce((s,r)=>s+r.amount,0);
+
+    renderBudgetBar('week', weekBudget, weekLoss, 'weekProgressFill', 'weekBudgetStatus', '本周');
+    renderBudgetBar('month', monthBudget, monthLoss, 'monthProgressFill', 'monthBudgetStatus', '本月');
+  }
+
+  function renderBudgetBar(type, budget, loss, fillId, statusId, label) {
+    const fill = document.getElementById(fillId);
+    const status = document.getElementById(statusId);
     if (!budget) {
       fill.style.width = '0%';
-      status.textContent = '点击右上角「修改上限」，设置每月最大亏损预算 👆';
+      status.textContent = `点击「修改上限」设置${label}最大亏损 👆`;
+      status.style.color = 'rgba(255,255,255,0.6)';
       return;
     }
     const pct = Math.min(loss/budget*100, 100);
     fill.style.width = pct + '%';
     fill.className = 'progress-fill' + (pct>=100?' danger':pct>=70?' warning':'');
-    if (pct>=100) { status.innerHTML = `🚨 本月已亏 ¥${loss}，超过上限 ¥${budget}！爸妈，收手吧！`; status.style.color='#ff6b6b'; }
-    else if (pct>=70) { status.innerHTML = `⚠️ 本月已亏 ¥${loss} / ¥${budget}（${Math.round(pct)}%），悠着点哦`; status.style.color='#ffc107'; }
-    else { status.innerHTML = `✅ 本月亏损 ¥${loss} / ¥${budget}（${Math.round(pct)}%），还好还好`; status.style.color='rgba(255,255,255,0.6)'; }
+    if (pct>=100) { status.innerHTML = `🚨 ${label}已亏 ¥${loss}，超过上限 ¥${budget}！收手吧！`; status.style.color='#ff6b6b'; }
+    else if (pct>=70) { status.innerHTML = `⚠️ ${label}已亏 ¥${loss} / ¥${budget}（${Math.round(pct)}%），悠着点`; status.style.color='#ffc107'; }
+    else { status.innerHTML = `✅ ${label}亏损 ¥${loss} / ¥${budget}（${Math.round(pct)}%），还好还好`; status.style.color='rgba(255,255,255,0.6)'; }
   }
 
   function renderRecords() {
     const list = document.getElementById('recordsList');
-    const filtered = currentFilter==='all' ? records : records.filter(r=>r.outcome===currentFilter);
+    let filtered = filterByView(records);
+    if (currentFilter === 'win') filtered = filtered.filter(r=>r.outcome==='win');
+    else if (currentFilter === 'lose') filtered = filtered.filter(r=>r.outcome==='lose');
+    else if (currentFilter === '一粒米') filtered = filtered.filter(r=>r.person==='一粒米');
+    else if (currentFilter === '谭老师') filtered = filtered.filter(r=>r.person==='谭老师');
+
     if (!filtered.length) {
-      list.innerHTML = `<div class="empty-state"><div class="icon">🀄</div><div>${currentFilter==='all'?'还没有记录，快去打一局！':'这个筛选下没有记录'}</div></div>`;
+      list.innerHTML = `<div class="empty-state"><div class="icon">🀄</div><div>还没有记录，快去打一局！</div></div>`;
       return;
     }
     list.innerHTML = filtered.map(r => {
       const isWin = r.outcome==='win';
       const ds = r.date ? r.date.slice(5).replace('-','/') : '';
+      const personIcon = r.person === '一粒米' ? '🌾' : '👩‍🏫';
       return `<div class="record-item">
         <div class="record-icon">${isWin?'🏆':'💸'}</div>
         <div class="record-info">
-          <div class="record-date">${r.date?.slice(0,4)||''}年 ${ds}</div>
+          <div class="record-meta">
+            <span class="record-date">${r.date?.slice(0,4)||''}/${ds}</span>
+            <span class="record-person">${personIcon} ${r.person||'未知'}</span>
+          </div>
           <div class="record-note">${esc(r.note||'')}</div>
         </div>
         <div class="record-amount ${isWin?'win':'lose'}">${isWin?'+':'-'}¥${r.amount}</div>
@@ -485,7 +575,115 @@
     }).join('');
   }
 
-  function esc(s) { return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
+  // ——— 全局函数 ———
+  window.setView = (view, el) => {
+    currentView = view;
+    document.querySelectorAll('.person-tab').forEach(t => t.classList.remove('active'));
+    el.classList.add('active');
+    renderAll();
+  };
+
+  window.selectPerson = (person) => {
+    currentPerson = person;
+    document.getElementById('btn一粒米').className = 'toggle-btn' + (person==='一粒米'?' active-person':'');
+    document.getElementById('btn谭老师').className = 'toggle-btn' + (person==='谭老师'?' active-person':'');
+  };
+
+  window.selectOutcome = (type) => {
+    currentOutcome = type;
+    document.getElementById('btnWin').className = 'toggle-btn' + (type==='win'?' active-win':'');
+    document.getElementById('btnLose').className = 'toggle-btn' + (type==='lose'?' active-lose':'');
+  };
+
+  window.addRecord = async () => {
+    const date = document.getElementById('inputDate').value;
+    const amount = parseFloat(document.getElementById('inputAmount').value);
+    const note = document.getElementById('inputNote').value.trim();
+    if (!date) { showToast('📅 日期不能为空哦'); return; }
+    if (!amount || amount <= 0) { showToast('💰 金额得填个正数吧'); return; }
+
+    const btn = document.getElementById('submitBtn');
+    btn.disabled = true;
+    syncEl.textContent = '☁️ 保存中…'; syncEl.className = 'sync-status syncing';
+
+    try {
+      await addDoc(collection(db, 'records'), {
+        date, amount, outcome: currentOutcome, person: currentPerson,
+        note: note || (currentOutcome==='win' ? `${currentPerson}又赢了！` : `${currentPerson}今天手气不好…`),
+        createdAt: Date.now()
+      });
+      document.getElementById('inputAmount').value = '';
+      document.getElementById('inputNote').value = '';
+      const msgs = currentOutcome==='win'
+        ? ['记下了！财神爷保佑 🎉','赢了赢了！记好账 ✅','人挡杀人，牌挡杀牌 🀄']
+        : ['哎，记下了…下把扳回来 🙏','亏了也是历练，记好账 📝','别灰心，东风还没来呢 💪'];
+      showToast(msgs[Math.floor(Math.random()*msgs.length)]);
+    } catch(e) { showToast('❌ 保存失败，检查网络'); }
+    btn.disabled = false;
+  };
+
+  window.deleteRecord = async (id) => {
+    if (!confirm('确定删除这条记录？')) return;
+    try { await deleteDoc(doc(db, 'records', id)); showToast('🗑️ 已删除'); }
+    catch(e) { showToast('❌ 删除失败'); }
+  };
+
+  window.setFilter = (filter, el) => {
+    currentFilter = filter;
+    document.querySelectorAll('.filter-tab').forEach(t => t.classList.remove('active'));
+    el.classList.add('active');
+    renderRecords();
+  };
+
+  window.openBudgetModal = (type) => {
+    editingBudgetType = type;
+    const isWeek = type === 'week';
+    document.getElementById('budgetModalTitle').textContent = isWeek ? '⚠️ 设置每周亏损上限' : '⚠️ 设置每月亏损上限';
+    document.getElementById('budgetModalDesc').textContent = isWeek
+      ? '本周亏损超过这个数，就会出现红色警告，提醒收手'
+      : '本月亏损超过这个数，就会出现红色警告，提醒收手';
+    document.getElementById('budgetInput').value = isWeek ? (weekBudget||'') : (monthBudget||'');
+    document.getElementById('budgetModal').classList.add('show');
+  };
+
+  window.closeBudgetModal = () => document.getElementById('budgetModal').classList.remove('show');
+
+  window.saveBudget = async () => {
+    const val = parseInt(document.getElementById('budgetInput').value);
+    if (!val || val <= 0) { showToast('请输入有效金额'); return; }
+    try {
+      const key = editingBudgetType === 'week' ? 'weekBudget' : 'monthBudget';
+      await setDoc(doc(db, 'settings', key), { value: val });
+      if (editingBudgetType === 'week') weekBudget = val;
+      else monthBudget = val;
+      closeBudgetModal();
+      renderBudgets();
+      showToast(`✅ ${editingBudgetType==='week'?'周':'月'}上限设置为 ¥${val}`);
+    } catch(e) { showToast('❌ 保存失败'); }
+  };
+
+  window.exportCSV = () => {
+    if (!records.length) { showToast('还没有记录可以导出'); return; }
+    const header = '日期,记录人,输赢,金额(元),备注';
+    const rows = records.map(r =>
+      `${r.date},${r.person||''},${r.outcome==='win'?'赢':'输'},${r.amount},"${(r.note||'').replace(/"/g,'""')}"`
+    );
+    const csv = '\uFEFF' + [header, ...rows].join('\n'); // BOM for Excel
+    const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `麻将战绩_${new Date().toISOString().slice(0,10)}.csv`;
+    a.click();
+    URL.revokeObjectURL(url);
+    showToast('📥 导出成功！');
+  };
+
+  document.getElementById('budgetModal').addEventListener('click', function(e) {
+    if (e.target === this) closeBudgetModal();
+  });
+
+  function esc(s) { return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
 
   function showToast(msg) {
     const t = document.getElementById('toast');
