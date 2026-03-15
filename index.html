@@ -274,7 +274,7 @@
 <script type="module">
   import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
   import {
-    getFirestore, collection, addDoc, deleteDoc, doc,
+    getFirestore, initializeFirestore, collection, addDoc, deleteDoc, doc,
     onSnapshot, query, orderBy
   } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
 
@@ -287,7 +287,8 @@
     appId: "1:710827165889:web:d9e953e8dfb5d57ead6c40"
   });
 
-  const db = getFirestore(app);
+  // 明确指定台湾节点
+  const db = initializeFirestore(app, {}, 'asia-east1');
 
   const WEEK_LIMIT = 10000;
   const MONTH_LIMIT = 20000;
@@ -311,9 +312,10 @@
       syncEl.className = 'sync-status synced';
       renderAll();
     },
-    () => {
+    (err) => {
       syncEl.textContent = '⚠️ 同步失败，检查网络';
       syncEl.className = 'sync-status error';
+      console.error(err);
     }
   );
 
@@ -497,7 +499,10 @@
         ? ['记下了！状态真好 🎉', '加分！记好账 ✅', '势不可挡！🀄']
         : ['记下了，下局扳回来 🙏', '没关系，继续努力 📝', '别灰心，下局一定行 💪'];
       showToast(msgs[Math.floor(Math.random() * msgs.length)]);
-    } catch(e) { showToast('❌ 保存失败，检查网络'); }
+    } catch(e) {
+      showToast('❌ 保存失败，检查网络');
+      console.error(e);
+    }
     btn.disabled = false;
   };
   window.deleteRecord = async (id) => {
